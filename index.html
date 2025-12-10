@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramientas IA - El Profe Caicedo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- ===== INICIO DEL CÓDIGO GUARDIA DE SEGURIDAD FINAL (Compatible con Netlify) ===== -->
+    <script type="module">
+        // 1. IMPORTACIONES (Siempre al principio)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+        // 2. LÓGICA DEL GUARDIA
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Si la "llave" de la Suite (`?autorizado=true`) NO está, el guardia actúa.
+        if (urlParams.get('autorizado') !== 'true') {
+
+            // La configuración de Firebase. Es necesaria para que funcione en Netlify.
+            // La seguridad real está en los "Dominios Autorizados" de la consola de Firebase.
+            // ESTA ES LA CONFIGURACIÓN CORRECTA Y UNIFICADA
+            const firebaseConfig = {
+                apiKey: "AIzaSyD_SCyO4s-fZZS2qBTKEqAFiWP3IPD97Uo",
+                authDomain: "plataforma-escala.firebaseapp.com",
+                projectId: "plataforma-escala",
+                storageBucket: "plataforma-escala.firebasestorage.app",
+                messagingSenderId: "917193676993",
+                appId: "1:917193676993:web:da3a51e59246bd917c1c40"
+            };
+            const suiteLoginPageUrl = 'https://www.caicedoeduca.com/';
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+
+                onAuthStateChanged(auth, (user) => {
+                    if (!user) {
+                        // Si no hay sesión de usuario, redirige a la suite.
+                        console.log("GUARDIA: Acceso no autorizado. Redirigiendo a la suite...");
+                        window.top.location.href = suiteLoginPageUrl;
+                    } else {
+                        console.log("GUARDIA: Usuario autenticado. Acceso permitido.");
+                    }
+                });
+            } catch (error) {
+                console.error("GUARDIA: Error crítico.", error);
+                window.top.location.href = suiteLoginPageUrl;
+            }
+        } else {
+            // Si la llave de la Suite está presente, el guardia no hace nada.
+            console.log("GUARDIA: Acceso autorizado por la Suite. El guardia no actuará.");
+        }
+    </script>
+    <!-- ===== FIN DEL CÓDIGO GUARDIA DE SEGURIDAD FINAL (Compatible con Netlify) ===== -->
+
+
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1><i class="fa-solid fa-robot"></i> Generador de Conclusiones - Situaciones significativas</h1>
+            <p>Seleccione la herramienta que desea utilizar:</p>
+        </header>
+
+        <div class="selector-panel">
+            <label class="tool-option">
+                <input type="radio" name="toolSelector" id="chkConclusiones" value="conclusiones"
+                    onchange="toggleTools()">
+                <div class="card">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Generador de Conclusiones</span>
+                </div>
+            </label>
+
+            <label class="tool-option">
+                <input type="radio" name="toolSelector" id="chkSituaciones" value="situaciones"
+                    onchange="toggleTools()">
+                <div class="card">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    <span>Situaciones Significativas</span>
+                </div>
+            </label>
+        </div>
+
+        <hr>
+
+        <section id="tool-conclusiones" class="tool-section hidden">
+            <h2>Generar Conclusiones Descriptivas</h2>
+            <form id="formConclusiones">
+                <div class="form-group">
+                    <label>Nivel:</label>
+                    <select id="conc-level" required>
+                        <option value="">Seleccione Nivel...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Área:</label>
+                    <select id="conc-area" required disabled>
+                        <option value="">Primero seleccione Nivel...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Competencia:</label>
+                    <select id="conc-comp" required disabled>
+                        <option value="">Primero seleccione Área...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nivel de Logro:</label>
+                    <select id="conc-logro">
+                        <option value="C">En Inicio (C)</option>
+                        <option value="B">En Proceso (B)</option>
+                        <option value="A">Logro Esperado (A)</option>
+                        <option value="AD">Logro Destacado (AD)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-generate">Generar Conclusiones</button>
+            </form>
+        </section>
+
+        <section id="tool-situaciones" class="tool-section hidden">
+            <h2>Generar Situación Significativa</h2>
+            <form id="formSituaciones">
+
+                <div class="static-header">
+                    <h4 style="margin-top:0; color:var(--primary);"><i class="fa-solid fa-map-pin"></i> Ubicación del
+                        Colegio</h4>
+
+                    <div class="location-grid">
+                        <div class="form-group-loc">
+                            <label for="sit-dept">Departamento:</label>
+                            <input type="text" id="sit-dept" required>
+                        </div>
+                        <div class="form-group-loc">
+                            <label for="sit-prov">Provincia:</label>
+                            <input type="text" id="sit-prov" required>
+                        </div>
+                        <div class="form-group-loc">
+                            <label for="sit-dist">Distrito:</label>
+                            <input type="text" id="sit-dist" required>
+                        </div>
+                        <div class="form-group-loc">
+                            <label for="sit-town">Centro Poblado (Opcional):</label>
+                            <input type="text" id="sit-town">
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 10px;">
+                        <div class="form-group half">
+                            <label>Nivel:</label>
+                            <select id="sit-level" required>
+                                <option value="">Cargando...</option>
+                            </select>
+                        </div>
+                        <div class="form-group half">
+                            <label>Grado:</label>
+                            <select id="sit-grade" required disabled>
+                                <option value="">Seleccione Nivel...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-search-problems" class="btn-secondary">
+                        <i class="fa-solid fa-magnifying-glass-location"></i> 1. Buscar problemas de la zona
+                    </button>
+                </div>
+
+                <hr style="border-color: #374151; margin: 20px 0;">
+
+                <div class="form-group">
+                    <label><i class="fa-solid fa-list-check"></i> 2. Selecciona los problemas a trabajar:</label>
+                    <div id="problems-container" class="checkbox-grid">
+                        <p style="color: #9ca3af; font-style: italic; text-align: center; padding: 20px;">
+                            Presiona "Buscar problemas" para cargar la lista aquí...
+                        </p>
+                    </div>
+                    <label for="manual-problems" class="block text-lg font-bold mb-2 mt-4 text-white">
+                        <i class="fa-solid fa-pen"></i> 3. O escribe aquí tus propias situaciones (enumera una por una):
+                    </label>
+
+                    <textarea id="manual-problems" class="w-full p-3 border rounded mb-4 text-black" rows="4"
+                        placeholder="Ejemplo:
+1. Contaminación en los canales de regadío.
+2. Falta de alumbrado público en la plaza."></textarea>
+                </div>
+
+                <button type="submit" class="btn-generate">Generar Unidades</button>
+            </form>
+        </section>
+
+        <div id="resultArea" class="hidden">
+            <h3>Resultado Generado:</h3>
+            <div id="outputContent" class="output-box"></div>
+            <div class="actions">
+                <button id="btnDownload" class="btn-download"><i class="fa-solid fa-file-word"></i> Descargar
+                    Word</button>
+                <button onclick="copyText()" class="btn-copy"><i class="fa-solid fa-copy"></i> Copiar</button>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden flex flex-col items-center justify-center py-8 text-center">
+
+            <i class="fa-solid fa-robot fa-bounce text-5xl text-yellow-500 mb-4"></i>
+
+            <h3 class="text-xl font-bold text-white mb-4">Creando Situaciones Significativas</h3>
+
+            <div class="w-full max-w-lg rounded-full h-8 mb-4 overflow-hidden border border-gray-500 relative"
+                style="background-color: #374151;">
+                <div id="progress-fill"
+                    class="h-full flex items-center justify-center text-xs text-white font-bold transition-all duration-500 ease-out"
+                    style="width: 5%; background-color: #3b82f6;"> 5%
+                </div>
+            </div>
+
+            <p id="loading-text" class="text-gray-300 font-medium animate-pulse">Iniciando...</p>
+        </div>
+
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

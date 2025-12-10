@@ -1,0 +1,13 @@
+{
+  "name": "el-profe-caicedo-tools",
+  "version": "1.0.0",
+  "description": "Generadores con IA para docentes",
+  "main": "index.html",
+  "scripts": {
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "docx": "^8.5.0"
+  }
+}
