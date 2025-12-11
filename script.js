@@ -375,21 +375,23 @@ document.getElementById('formSituaciones')?.addEventListener('submit', async (e)
 // 4. CONEXIÓN CON NETLIFY FUNCTIONS (IA)
 // ==========================================
 
+// ==========================================
+// 4. CONEXIÓN CON NETLIFY FUNCTIONS (IA) - MODIFICADA
+// ==========================================
+
 async function callAI(functionName, payload) {
     const loading = document.getElementById('loading');
     const resultArea = document.getElementById('resultArea');
     const outputContent = document.getElementById('outputContent');
 
-    // UI Updates (Aquí empieza la magia)
+    // UI Updates
     resultArea.classList.add('hidden');
-    loading.classList.remove('hidden'); // <--- Aquí hacemos visible el spinner
+    loading.classList.remove('hidden'); 
     outputContent.textContent = "";
 
-    // ==========================================
-    // 1. SCROLL AL CARGANDO (NUEVO)
-    // ==========================================
-    // Esto baja la pantalla suavemente hasta la animación para que el usuario vea que está trabajando
+    // Scroll al cargando
     loading.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
     try {
         const response = await fetch(`/.netlify/functions/${functionName}`, {
             method: 'POST',
@@ -401,17 +403,17 @@ async function callAI(functionName, payload) {
         const data = await response.json();
         currentGeneratedText = data.text;
         
-        // Mostrar resultado
-        outputContent.textContent = currentGeneratedText;
+        // --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
+        // En lugar de solo pegar texto, usamos la función de formateo
+        renderFormattedResult(currentGeneratedText, outputContent);
+        
         loading.classList.add('hidden');
         resultArea.classList.remove('hidden');
-        // ==========================================
-        //  NUEVO CÓDIGO: SCROLL AL BOTÓN DESCARGAR
-        // ==========================================
+
+        // Scroll al botón descargar
         setTimeout(() => {
             const btnDownload = document.getElementById('btnDownload');
             if (btnDownload) {
-                // 'block: center' centra el botón en la pantalla
                 btnDownload.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }, 100);
@@ -420,6 +422,65 @@ async function callAI(functionName, payload) {
         console.error(error);
         loading.classList.add('hidden');
         alert("Hubo un error al generar el contenido. Revisa la consola para más detalles.");
+    }
+}
+
+// === NUEVA FUNCIÓN PARA CREAR LOS BOTONES INDIVIDUALES ===
+function renderFormattedResult(text, container) {
+    container.innerHTML = ""; // Limpiar contenedor
+
+    // Detectamos si el texto tiene el formato de opciones (Opción 1:, Opción 2:, etc.)
+    // Usamos una expresión regular para partir el texto donde diga "Opción X:"
+    const parts = text.split(/(?=Opción \d+:)/g);
+
+    // Si encontramos divisiones (es decir, hay varias opciones)
+    if (parts.length > 1) {
+        parts.forEach((part) => {
+            if (part.trim() === "") return; // Ignorar espacios vacíos
+
+            // Crear el contenedor de la tarjeta (HTML dinámico)
+            const card = document.createElement('div');
+            card.className = 'result-option-card';
+
+            // Crear el texto
+            const p = document.createElement('p');
+            p.className = 'result-option-text';
+            p.textContent = part.trim();
+
+            // Crear el botón de copiar individual
+            const btn = document.createElement('button');
+            btn.className = 'btn-copy-small';
+            btn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+            btn.title = "Copiar esta opción";
+            
+            // Acción al hacer click en el botón individual
+            btn.onclick = () => {
+                navigator.clipboard.writeText(part.trim());
+                
+                // Efecto visual de "Copiado"
+                const originalIcon = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                btn.style.backgroundColor = '#10b981'; // Verde
+                btn.style.color = 'white';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalIcon;
+                    btn.style.backgroundColor = ''; // Volver al original
+                    btn.style.color = '';
+                }, 2000);
+            };
+
+            // Armar la tarjeta
+            card.appendChild(p);
+            card.appendChild(btn);
+
+            // Agregar al contenedor principal
+            container.appendChild(card);
+        });
+    } else {
+        // SI NO hay formato de opciones (ej. Situaciones significativas normales)
+        // Mostramos el texto plano como siempre
+        container.textContent = text;
     }
 }
 

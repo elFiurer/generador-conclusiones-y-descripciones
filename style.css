@@ -213,3 +213,60 @@ button {
 .form-group-loc input {
     margin-top: 3px;
 }
+
+/* =========================================
+   NUEVOS ESTILOS PARA OPCIONES INDIVIDUALES
+   ========================================= */
+
+/* Contenedor de cada opción individual */
+.result-option-card {
+    background-color: #262f3e; /* Un tono ligeramente diferente al fondo */
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex; /* Para poner texto a la izquierda y botón a la derecha */
+    gap: 15px;
+    align-items: flex-start; /* Alineación superior */
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.result-option-card:hover {
+    border-color: var(--primary);
+}
+
+/* El texto dentro de la tarjeta */
+.result-option-text {
+    flex: 1; /* Ocupa todo el espacio disponible */
+    margin: 0;
+    white-space: pre-wrap; /* Mantiene el formato del texto */
+    color: #e5e7eb;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* El botón pequeño de copiar */
+.btn-copy-small {
+    background-color: #374151;
+    color: var(--text-gray);
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    width: 40px; 
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0; /* Evita que el botón se aplaste */
+}
+
+.btn-copy-small:hover {
+    background-color: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+}
+
+.btn-copy-small i {
+    font-size: 1.1rem;
+}
