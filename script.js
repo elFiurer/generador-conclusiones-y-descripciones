@@ -425,7 +425,7 @@ async function callAI(functionName, payload) {
     }
 }
 
-// === FUNCIÓN DE RENDERIZADO CON COPIADO ROBUSTO ===
+// === FUNCIÓN DE RENDERIZADO CORREGIDA (SEPARA TÍTULO Y CONTENIDO) ===
 function renderFormattedResult(text, container) {
     container.innerHTML = ""; // Limpiar contenedor
 
@@ -436,41 +436,66 @@ function renderFormattedResult(text, container) {
         parts.forEach((part) => {
             if (part.trim() === "") return;
 
+            // 1. SEPARAR EL TÍTULO DEL CONTENIDO REAL
+            // Usamos una expresión regular para sacar "Opción X:" del resto del texto
+            // match[1] será el título, match[2] será el cuerpo del texto
+            const match = part.match(/^(Opción \d+:)\s*([\s\S]*)$/i);
+
+            let titleText = "";
+            let bodyText = part.trim(); // Por defecto todo, por si acaso falle el regex
+
+            if (match) {
+                titleText = match[1].trim(); // Ej: "Opción 1:"
+                bodyText = match[2].trim();  // Ej: "El estudiante demuestra..."
+            }
+
+            // 2. CREAR EL TÍTULO (FUERA DE LA TARJETA)
+            if (titleText) {
+                const titleElement = document.createElement('h4');
+                titleElement.textContent = titleText;
+                // Estilos directos para que se vea bien como encabezado
+                titleElement.style.textAlign = 'left'; 
+                titleElement.style.color = 'var(--primary)'; // Usa el amarillo de tu tema
+                titleElement.style.marginTop = '20px';
+                titleElement.style.marginBottom = '5px';
+                container.appendChild(titleElement);
+            }
+
+            // 3. CREAR LA TARJETA (SOLO CON EL BODYTEXT)
             const card = document.createElement('div');
             card.className = 'result-option-card';
 
             const p = document.createElement('p');
             p.className = 'result-option-text';
-            p.textContent = part.trim();
+            p.textContent = bodyText; // <--- AQUÍ SOLO VA EL TEXTO LIMPIO
 
             // Botón individual
             const btn = document.createElement('button');
             btn.className = 'btn-copy-small';
             btn.innerHTML = '<i class="fa-regular fa-copy"></i>';
-            btn.title = "Copiar esta opción";
+            btn.title = "Copiar solo este texto";
             
-            // --- AQUÍ ESTÁ EL CAMBIO PARA OBLIGAR A COPIAR ---
+            // --- LÓGICA DE COPIADO ---
             btn.onclick = () => {
-                const textToCopy = part.trim();
+                // Usamos bodyText, que YA NO TIENE el título "Opción X:"
+                const textToCopy = bodyText; 
 
-                // 1. Método A prueba de fallos (Truco del Textarea invisible)
                 try {
                     const textArea = document.createElement("textarea");
                     textArea.value = textToCopy;
                     
-                    // Lo hacemos invisible y lo agregamos al documento
                     textArea.style.position = "fixed";
                     textArea.style.left = "-9999px";
                     document.body.appendChild(textArea);
                     
                     textArea.select();
-                    document.execCommand('copy'); // Forzamos el comando de sistema
+                    document.execCommand('copy'); 
                     document.body.removeChild(textArea);
 
-                    // 2. Efecto visual de ÉXITO
+                    // Efecto visual de ÉXITO
                     const originalIcon = btn.innerHTML;
                     btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-                    btn.style.backgroundColor = '#10b981'; // Verde
+                    btn.style.backgroundColor = '#10b981';
                     btn.style.color = 'white';
                     
                     setTimeout(() => {
@@ -481,7 +506,7 @@ function renderFormattedResult(text, container) {
 
                 } catch (err) {
                     console.error('Error al copiar:', err);
-                    alert('No se pudo copiar automáticamente. Por favor selecciona el texto y presiona Ctrl+C');
+                    alert('No se pudo copiar automáticamente.');
                 }
             };
 
@@ -490,11 +515,10 @@ function renderFormattedResult(text, container) {
             container.appendChild(card);
         });
     } else {
-        // Si no son opciones separadas, mostrar normal
+        // Si no son opciones separadas (ej. Situaciones), mostrar normal
         container.textContent = text;
     }
 }
-
 // ==========================================
 // 5. DESCARGA DE WORD
 // ==========================================
