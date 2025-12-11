@@ -425,61 +425,72 @@ async function callAI(functionName, payload) {
     }
 }
 
-// === NUEVA FUNCIÓN PARA CREAR LOS BOTONES INDIVIDUALES ===
+// === FUNCIÓN DE RENDERIZADO CON COPIADO ROBUSTO ===
 function renderFormattedResult(text, container) {
     container.innerHTML = ""; // Limpiar contenedor
 
-    // Detectamos si el texto tiene el formato de opciones (Opción 1:, Opción 2:, etc.)
-    // Usamos una expresión regular para partir el texto donde diga "Opción X:"
+    // Detectamos si el texto tiene el formato de opciones
     const parts = text.split(/(?=Opción \d+:)/g);
 
-    // Si encontramos divisiones (es decir, hay varias opciones)
     if (parts.length > 1) {
         parts.forEach((part) => {
-            if (part.trim() === "") return; // Ignorar espacios vacíos
+            if (part.trim() === "") return;
 
-            // Crear el contenedor de la tarjeta (HTML dinámico)
             const card = document.createElement('div');
             card.className = 'result-option-card';
 
-            // Crear el texto
             const p = document.createElement('p');
             p.className = 'result-option-text';
             p.textContent = part.trim();
 
-            // Crear el botón de copiar individual
+            // Botón individual
             const btn = document.createElement('button');
             btn.className = 'btn-copy-small';
             btn.innerHTML = '<i class="fa-regular fa-copy"></i>';
             btn.title = "Copiar esta opción";
             
-            // Acción al hacer click en el botón individual
+            // --- AQUÍ ESTÁ EL CAMBIO PARA OBLIGAR A COPIAR ---
             btn.onclick = () => {
-                navigator.clipboard.writeText(part.trim());
-                
-                // Efecto visual de "Copiado"
-                const originalIcon = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-                btn.style.backgroundColor = '#10b981'; // Verde
-                btn.style.color = 'white';
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalIcon;
-                    btn.style.backgroundColor = ''; // Volver al original
-                    btn.style.color = '';
-                }, 2000);
+                const textToCopy = part.trim();
+
+                // 1. Método A prueba de fallos (Truco del Textarea invisible)
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = textToCopy;
+                    
+                    // Lo hacemos invisible y lo agregamos al documento
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-9999px";
+                    document.body.appendChild(textArea);
+                    
+                    textArea.select();
+                    document.execCommand('copy'); // Forzamos el comando de sistema
+                    document.body.removeChild(textArea);
+
+                    // 2. Efecto visual de ÉXITO
+                    const originalIcon = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    btn.style.backgroundColor = '#10b981'; // Verde
+                    btn.style.color = 'white';
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalIcon;
+                        btn.style.backgroundColor = '';
+                        btn.style.color = '';
+                    }, 2000);
+
+                } catch (err) {
+                    console.error('Error al copiar:', err);
+                    alert('No se pudo copiar automáticamente. Por favor selecciona el texto y presiona Ctrl+C');
+                }
             };
 
-            // Armar la tarjeta
             card.appendChild(p);
             card.appendChild(btn);
-
-            // Agregar al contenedor principal
             container.appendChild(card);
         });
     } else {
-        // SI NO hay formato de opciones (ej. Situaciones significativas normales)
-        // Mostramos el texto plano como siempre
+        // Si no son opciones separadas, mostrar normal
         container.textContent = text;
     }
 }
